@@ -1,4 +1,4 @@
-from board import Piece, Board, Move, Tile
+from board import Piece, Move, Tile
 from PIL import Image
 from copy import deepcopy
 from enums import PIECE_TYPES, TEAMS, MOVES
@@ -28,28 +28,34 @@ class Chess_Config(Config):
             for _ in range(count):
                 pieces[name].append(deepcopy(piece))
 
+        def get_tile(tiles: list[list[Tile]], x: int, y: int) -> Tile:
+            if (y < 0 or y >= len(tiles)) or (x < 0 or x >= len(tiles[0])):
+                return None
+
+            return tiles[y][x]
+
         SIZE = 100
 
-        def white_pawn_func(board: Board, piece: Piece) -> list(MOVES):
-            def get_next(count, sway=0) -> Tile:
+        def white_pawn_func(tiles: list[list[Tile]], piece: Piece) -> list(MOVES):
+            def get_next(count, sway=0) -> Tile:    
                 tile = piece.tile
 
-                new_x = tile.coordinate_x if tile.coordinate_x + sway not in range(0, board.width) else tile.coordinate_x + sway
+                new_x = tile.coordinate_x if tile.coordinate_x + sway not in range(0, len(tiles[0])) else tile.coordinate_x + sway
 
-                new_tile = board.get_tile(new_x, tile.coordinate_y - count)
+                if not (tile.coordinate_y + count < 0 or tile.coordinate_y + count >= len(tiles)):
+                    temp = int(tiles[tile.coordinate_y + count][new_x].name[1]) + count
 
-                if new_tile == None:
-                    return None
+                    if int(tile.name[1]) == temp:
+                        return tiles[tile.coordinate_y + count][new_x]
 
-                if not int(tile.name[1]) == int(new_tile.name[1]) + count:
-                    new_tile = board.get_tile(new_x, tile.coordinate_y + count)
+                if not (tile.coordinate_y - count < 0 or tile.coordinate_y - count >= len(tiles)):
+                    temp = int(tiles[tile.coordinate_y - count][new_x].name[1]) + count
+                    if int(tile.name[1]) == temp:
+                        return tiles[tile.coordinate_y - count][new_x]
 
-                return new_tile
+                return None
 
             moves = []
-
-            cur_x = piece.tile.coordinate_x
-            cur_y = piece.tile.coordinate_y
 
             if not piece.has_moved:
                 new_tile = get_next(2)
@@ -72,26 +78,26 @@ class Chess_Config(Config):
 
             return moves
 
-        def black_pawn_func(board: Board, piece: Piece) -> list(MOVES):
-            def get_next(count, sway=0) -> Tile:
+        def black_pawn_func(tiles: list[list[Tile]], piece: Piece) -> list(MOVES):
+            def get_next(count, sway=0) -> Tile:    
                 tile = piece.tile
 
-                new_x = tile.coordinate_x if tile.coordinate_x + sway not in range(0, board.width) else tile.coordinate_x + sway
+                new_x = tile.coordinate_x if tile.coordinate_x + sway not in range(0, len(tiles[0])) else tile.coordinate_x + sway
 
-                new_tile = board.get_tile(new_x, tile.coordinate_y + count)
+                if not (tile.coordinate_y + count < 0 or tile.coordinate_y + count >= len(tiles)):
+                    temp = int(tiles[tile.coordinate_y + count][new_x].name[1]) - count
 
-                if new_tile == None:
-                    return None
+                    if int(tile.name[1]) == temp:
+                        return tiles[tile.coordinate_y + count][new_x]
 
-                if not int(tile.name[1]) == int(new_tile.name[1]) - count:
-                    new_tile = board.get_tile(new_x, tile.coordinate_y - count)
+                if not (tile.coordinate_y - count < 0 or tile.coordinate_y - count >= len(tiles)):
+                    temp = int(tiles[tile.coordinate_y - count][new_x].name[1]) - count
+                    if int(tile.name[1]) == temp:
+                        return tiles[tile.coordinate_y - count][new_x]
 
-                return new_tile
+                return None
 
             moves = []
-
-            cur_x = piece.tile.coordinate_x
-            cur_y = piece.tile.coordinate_y
 
             if not piece.has_moved:
                 new_tile = get_next(2)
@@ -114,13 +120,13 @@ class Chess_Config(Config):
 
             return moves
 
-        def knight_func(board: Board, piece: Piece) -> list(MOVES):
+        def knight_func(tiles: list[list[Tile]], piece: Piece) -> list(MOVES):
             dirs = [(-2, 1), (-1, 2), (1, 2), (2, 1), (2, -1), (1, -2), (-1, -2), (-2, -1)]
 
             moves = []
 
             for direction in dirs:
-                tile = board.get_tile(piece.tile.coordinate_x + direction[1], piece.tile.coordinate_y  + direction[0])
+                tile = get_tile(tiles, piece.tile.coordinate_x + direction[1], piece.tile.coordinate_y  + direction[0])
 
                 if tile == None:
                     continue
@@ -136,14 +142,14 @@ class Chess_Config(Config):
 
             return moves
 
-        def bishop_func(board: Board, piece: Piece) -> list(MOVES):
+        def bishop_func(tiles: list[list[Tile]], piece: Piece) -> list(MOVES):
             dirs = [(-1, 1), (1, 1), (1, -1), (-1, -1)]
 
             moves = []
 
             for direction in dirs:
                 for i in range(1, 8):
-                    tile = board.get_tile(piece.tile.coordinate_x + direction[1] * i, piece.tile.coordinate_y  + direction[0] * i)
+                    tile = get_tile(tiles, piece.tile.coordinate_x + direction[1] * i, piece.tile.coordinate_y  + direction[0] * i)
 
                     if tile == None:
                         break
@@ -160,14 +166,14 @@ class Chess_Config(Config):
 
             return moves
 
-        def rook_func(board: Board, piece: Piece) -> list(MOVES):
+        def rook_func(tiles: list[list[Tile]], piece: Piece) -> list(MOVES):
             dirs = [(-1, 0), (0, 1), (1, 0), (0, -1)]
 
             moves = []
 
             for direction in dirs:
                 for i in range(1, 8):
-                    tile = board.get_tile(piece.tile.coordinate_x + direction[1] * i, piece.tile.coordinate_y  + direction[0] * i)
+                    tile = get_tile(tiles, piece.tile.coordinate_x + direction[1] * i, piece.tile.coordinate_y  + direction[0] * i)
 
                     if tile == None:
                         break
@@ -184,14 +190,14 @@ class Chess_Config(Config):
 
             return moves
 
-        def queen_func(board: Board, piece: Piece) -> list(MOVES):
+        def queen_func(tiles: list[list[Tile]], piece: Piece) -> list(MOVES):
             dirs = [(-1, 0), (0, 1), (1, 0), (0, -1), (-1, 1), (1, 1), (1, -1), (-1, -1)]
 
             moves = []
 
             for direction in dirs:
                 for i in range(1, 8):
-                    tile = board.get_tile(piece.tile.coordinate_x + direction[1] * i, piece.tile.coordinate_y  + direction[0] * i)
+                    tile = get_tile(tiles, piece.tile.coordinate_x + direction[1] * i, piece.tile.coordinate_y  + direction[0] * i)
 
                     if tile == None:
                         break
@@ -208,13 +214,13 @@ class Chess_Config(Config):
 
             return moves
 
-        def king_func(board: Board, piece: Piece) -> list(MOVES):
+        def king_func(tiles: list[list[Tile]], piece: Piece) -> list(MOVES):
             dirs = [(-1, 0), (0, 1), (1, 0), (0, -1), (-1, 1), (1, 1), (1, -1), (-1, -1)]
 
             moves = []
 
             for direction in dirs:
-                tile = board.get_tile(piece.tile.coordinate_x + direction[1], piece.tile.coordinate_y  + direction[0])
+                tile = get_tile(tiles, piece.tile.coordinate_x + direction[1], piece.tile.coordinate_y  + direction[0])
 
                 if tile == None:
                     break

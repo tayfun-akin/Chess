@@ -117,7 +117,7 @@ class Engine():
         if canvas==None:
             canvas = self.canvas
 
-        # ADD BOARD FUNCTIONALITY TO THE EVENT FUNCTIONS
+        # ADD MOVE SAVING SO DONT HAVE TO CALC MOVES ON BOTH INIT AND DROP EVENTS
         def init_drag(event: tk.Event):
             cur_x = event.widget.winfo_x() + event.x
             cur_y = event.widget.winfo_y() + event.y
@@ -129,7 +129,7 @@ class Engine():
 
             # CARRY THESE INTO FUNCTIONS
             if tile.object != None:
-                moves = tile.object.move_func(self.board, tile.object)
+                moves = tile.object.move_func(self.board.tiles, tile.object)
 
                 for m in moves:
                     if m.tile.object != None:
@@ -166,7 +166,7 @@ class Engine():
             tile = self.board.get_tile(coor_x, coor_y)
 
             piece = self.board.get_moving()
-            moves = piece.move_func(self.board, piece)
+            moves = piece.move_func(self.board.tiles, piece)
 
             new_x = piece.tile.attr['x1']
             new_y = piece.tile.attr['y1']

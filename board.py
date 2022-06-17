@@ -70,31 +70,51 @@ class Board():
 
                 self.tiles[y].append(new_tile)
 
+    def copy_tiles(self) -> list[list[Tile]]:
+        tiles = []
+
+        for y in range(self.height):
+            tiles.append([])
+
+            for x in range(self.width):
+                old_tile = self.tiles[y][x]
+
+                new_tile = Tile(old_tile.name, x, y)
+
+                new_tile.object = old_tile.object
+
+                tiles[y].append(new_tile)
+
+        return tiles
+
 # DOES NOT WORK YET
 #------------------------------------------------------------------------------------------------
 
-    def get_team_pieces(self, team: TEAMS) -> list[Piece]:
+    def get_team_pieces(self, team: TEAMS, tiles: list[list[Tile]]=None) -> list[Piece]:
         pieces = []
 
-        for y in self.height:
-            for x in self.width:
-                piece = self.tiles[y][x].object
+        tiles = tiles if tiles != None else self.tiles
 
-                if piece.team == team:
+        for y in range(self.height):
+            for x in range(self.width):
+                piece = tiles[y][x].object
+
+                if piece != None and piece.team == team:
                     pieces.append(piece)
 
         return pieces
 
+    # IMPLEMENT PROPERLY
     def is_check(self, move: Move) -> bool:
-        new_board = Board(self.height, self.width)
-        new_board.tiles = deepcopy(self.tiles)
+        new_tiles = self.copy_tiles()
 
-        new_board.move_piece(move=move)
+        new_tiles[move.tile.coordinate_y][move.tile.coordinate_y].object = new_tiles[move.piece.tile.coordinate_y][move.piece.tile.coordinate_x].object
+        new_tiles[move.piece.tile.coordinate_y][move.piece.tile.coordinate_x].object = None
 
-        pieces = new_board.get_team_pieces(move.piece.team)
+        pieces = self.get_team_pieces(move.piece.team, tiles=new_tiles)
 
         for piece in pieces:
-            moves = piece.move_func(new_board, piece)
+            moves = piece.move_func(new_tiles, piece)
 
             for move in moves:
                 if move.tile.object != None and move.tile.object.type == PIECE_TYPES.king:
