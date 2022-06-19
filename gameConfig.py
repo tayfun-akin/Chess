@@ -223,14 +223,14 @@ class Chess_Config(Config):
                 tile = get_tile(tiles, piece.tile.coordinate_x + direction[1], piece.tile.coordinate_y  + direction[0])
 
                 if tile == None:
-                    break
+                    continue
 
                 if tile.object == None:
                     moves.append(Move(piece, tile, MOVES.move))
                     continue
 
                 if tile.object.team == piece.team:
-                    break
+                    continue
 
                 moves.append(Move(piece, tile, MOVES.capture))
 

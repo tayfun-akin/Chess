@@ -49,6 +49,9 @@ class Piece():
         self.is_moving = False
         self.is_captured = False
 
+    def __str__(self) -> str:
+        return self.name
+
 class Move():
     def __init__(self, piece: Piece, tile: Tile=None, type: Enum=None) -> None:
         self.piece = piece
@@ -108,16 +111,18 @@ class Board():
     def is_check(self, move: Move) -> bool:
         new_tiles = self.copy_tiles()
 
-        new_tiles[move.tile.coordinate_y][move.tile.coordinate_y].object = new_tiles[move.piece.tile.coordinate_y][move.piece.tile.coordinate_x].object
+        new_tiles[move.tile.coordinate_y][move.tile.coordinate_x].object = new_tiles[move.piece.tile.coordinate_y][move.piece.tile.coordinate_x].object
         new_tiles[move.piece.tile.coordinate_y][move.piece.tile.coordinate_x].object = None
 
-        pieces = self.get_team_pieces(move.piece.team, tiles=new_tiles)
+        #print(self.tile_to_str(new_tiles))
+
+        pieces = self.get_team_pieces(TEAMS.black if move.piece.team == TEAMS.white else TEAMS.white , tiles=new_tiles)
 
         for piece in pieces:
             moves = piece.move_func(new_tiles, piece)
 
-            for move in moves:
-                if move.tile.object != None and move.tile.object.type == PIECE_TYPES.king:
+            for m in moves:
+                if m.tile.object != None and m.tile.object.type == PIECE_TYPES.king:
                     return True
 
         return False
@@ -165,6 +170,9 @@ class Board():
                         return tile.object
 
         return None
+
+    def tile_to_str(self, tiles: list[list[Tile]]) -> str:
+        return "\n".join([" ".join([str(tiles[y][x]) for x in range(len(tiles[0]))]) for y in range(len(tiles))])
 
     def __str__(self) -> str:
         return "\n".join([" ".join([str(self.tiles[y][x]) for x in range(self.width)]) for y in range(self.height)])

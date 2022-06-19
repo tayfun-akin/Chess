@@ -96,9 +96,6 @@ class Engine():
                 if tile.object != None:
                     widget = self.create_piece(tile.object, canvas)
 
-                #if widget != None:
-                #    widget.lift()
-
                 tile.canvas_rect = canvas.create_rectangle((x1, y1, x2, y2), fill=color)
 
         return canvas
@@ -137,7 +134,6 @@ class Engine():
                         continue
 
                     canvas.itemconfig(m.tile.canvas_rect, fill=self.colors['yellow'])
-                        
 
                 tile.object.is_moving = True
 
@@ -166,7 +162,15 @@ class Engine():
             tile = self.board.get_tile(coor_x, coor_y)
 
             piece = self.board.get_moving()
+            if piece == None:
+                return
+
             moves = piece.move_func(self.board.tiles, piece)
+
+            new_x = piece.tile.attr['x1']
+            new_y = piece.tile.attr['y1']
+            new_color = piece.tile.attr['org_color']
+            dest = piece.tile
 
             new_x = piece.tile.attr['x1']
             new_y = piece.tile.attr['y1']
@@ -175,7 +179,13 @@ class Engine():
 
             for m in moves:
                 if m.tile == tile:
-                    if not self.board.is_check(m):
+                    if self.board.is_check(m):
+                        new_x = piece.tile.attr['x1']
+                        new_y = piece.tile.attr['y1']
+                        new_color = piece.tile.attr['org_color']
+                        dest = piece.tile
+
+                    else:
                         new_x = tile.attr['x1']
                         new_y = tile.attr['y1']
                         new_color = tile.attr['org_color']
