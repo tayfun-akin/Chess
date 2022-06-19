@@ -40,7 +40,10 @@ class Chess_Config(Config):
             def get_next(count, sway=0) -> Tile:    
                 tile = piece.tile
 
-                new_x = tile.coordinate_x if tile.coordinate_x + sway not in range(0, len(tiles[0])) else tile.coordinate_x + sway
+                if tile.coordinate_x + sway not in range(0, len(tiles[0])):
+                    return None
+
+                new_x = tile.coordinate_x + sway
 
                 if not (tile.coordinate_y + count < 0 or tile.coordinate_y + count >= len(tiles)):
                     temp = int(tiles[tile.coordinate_y + count][new_x].name[1]) + count
@@ -82,7 +85,10 @@ class Chess_Config(Config):
             def get_next(count, sway=0) -> Tile:    
                 tile = piece.tile
 
-                new_x = tile.coordinate_x if tile.coordinate_x + sway not in range(0, len(tiles[0])) else tile.coordinate_x + sway
+                if tile.coordinate_x + sway not in range(0, len(tiles[0])):
+                    return None
+
+                new_x = tile.coordinate_x + sway
 
                 if not (tile.coordinate_y + count < 0 or tile.coordinate_y + count >= len(tiles)):
                     temp = int(tiles[tile.coordinate_y + count][new_x].name[1]) - count
