@@ -110,36 +110,35 @@ class Engine():
 
                 canvas.itemconfig(tile.canvas_rect, fill=tile.attr['org_color'])
 
+    def paint_moves(self, canvas: tk.Canvas, tile: Tile) -> None:
+        if tile.object != None:
+            moves = self.board.get_piece_moves(tile.object)
+
+            for m in moves:
+                if m.type == MOVES.capture:
+                    m.tile.object.widget.configure(bg=self.colors['red'])
+                    continue
+
+                canvas.itemconfig(m.tile.canvas_rect, fill=self.colors['yellow'])
+
+            tile.object.is_moving = True
+
+        canvas.itemconfig(tile.canvas_rect, fill=self.colors['blue'])
+        tile.object.widget.configure(bg=self.colors['blue'])
+        tile.object.widget.lift()
+
     def create_piece(self, piece: Piece, canvas: tk.Canvas=None) -> tk.Widget:
         if canvas==None:
             canvas = self.canvas
 
         # ADD MOVE SAVING SO DONT HAVE TO CALC MOVES ON BOTH INIT AND DROP EVENTS
         def init_drag(event: tk.Event):
-            cur_x = event.widget.winfo_x() + event.x
-            cur_y = event.widget.winfo_y() + event.y
-
-            coor_x = int(cur_x / self.icon_size)
-            coor_y = int(cur_y / self.icon_size)
+            coor_x = int((event.widget.winfo_x() + event.x) / self.icon_size)
+            coor_y = int((event.widget.winfo_y() + event.y) / self.icon_size)
 
             tile = self.board.get_tile(coor_x, coor_y)
 
-            # CARRY THESE INTO FUNCTIONS
-            if tile.object != None:
-                moves = tile.object.move_func(self.board.tiles, tile.object)
-
-                for m in moves:
-                    if m.tile.object != None:
-                        m.tile.object.widget.configure(bg=self.colors['red'])
-                        continue
-
-                    canvas.itemconfig(m.tile.canvas_rect, fill=self.colors['yellow'])
-
-                tile.object.is_moving = True
-
-            canvas.itemconfig(tile.canvas_rect, fill=self.colors['blue'])
-            event.widget.configure(bg=self.colors['blue'])
-            event.widget.lift()
+            self.paint_moves(canvas, tile)
 
         def drag(event: tk.Event):
             if type(event.widget) != tk.Label:
@@ -153,11 +152,8 @@ class Engine():
             widget.place(x=new_x, y=new_y, anchor = "center")
 
         def drop(event: tk.Event):
-            cur_x = event.widget.winfo_x() + event.x
-            cur_y = event.widget.winfo_y() + event.y
-
-            coor_x = int(cur_x / self.icon_size)
-            coor_y = int(cur_y / self.icon_size)
+            coor_x = int((event.widget.winfo_x() + event.x) / self.icon_size)
+            coor_y = int((event.widget.winfo_y() + event.y) / self.icon_size)
 
             tile = self.board.get_tile(coor_x, coor_y)
 
@@ -165,12 +161,7 @@ class Engine():
             if piece == None:
                 return
 
-            moves = piece.move_func(self.board.tiles, piece)
-
-            new_x = piece.tile.attr['x1']
-            new_y = piece.tile.attr['y1']
-            new_color = piece.tile.attr['org_color']
-            dest = piece.tile
+            moves = self.board.get_piece_moves(piece)
 
             new_x = piece.tile.attr['x1']
             new_y = piece.tile.attr['y1']
@@ -179,25 +170,33 @@ class Engine():
 
             for m in moves:
                 if m.tile == tile:
-                    if self.board.is_check(m):
-                        new_x = piece.tile.attr['x1']
-                        new_y = piece.tile.attr['y1']
-                        new_color = piece.tile.attr['org_color']
-                        dest = piece.tile
-
-                    else:
-                        new_x = tile.attr['x1']
-                        new_y = tile.attr['y1']
-                        new_color = tile.attr['org_color']
-                        dest = tile
+                    new_x = tile.attr['x1']
+                    new_y = tile.attr['y1']
+                    new_color = tile.attr['org_color']
+                    dest = tile
 
                     break
+
+            #for m in moves:
+            #    if m.tile == tile:
+            #        if self.board.is_check(m):
+            #            new_x = piece.tile.attr['x1']
+            #            new_y = piece.tile.attr['y1']
+            #            new_color = piece.tile.attr['org_color']
+            #            dest = piece.tile
+            #
+            #        else:
+            #            new_x = tile.attr['x1']
+            #            new_y = tile.attr['y1']
+            #            new_color = tile.attr['org_color']
+            #            dest = tile
+            #
+            #        break
 
             event.widget.place(x=new_x, y=new_y, anchor = "nw")
             event.widget.configure(bg=new_color)
 
             self.board.move_piece(piece, dest)
-
             self.reset_canvas(canvas)
 
             piece.is_moving = False

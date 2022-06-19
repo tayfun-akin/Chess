@@ -90,8 +90,15 @@ class Board():
 
         return tiles
 
-# DOES NOT WORK YET
-#------------------------------------------------------------------------------------------------
+    def get_piece_moves(self, piece: Piece) -> list[Move]:
+        all_moves = piece.move_func(self.tiles, piece)
+        final_moves = []
+
+        for m in all_moves:
+            if not self.is_check(m):
+                final_moves.append(m)
+
+        return final_moves
 
     def get_team_pieces(self, team: TEAMS, tiles: list[list[Tile]]=None) -> list[Piece]:
         pieces = []
@@ -107,14 +114,11 @@ class Board():
 
         return pieces
 
-    # IMPLEMENT PROPERLY
     def is_check(self, move: Move) -> bool:
         new_tiles = self.copy_tiles()
 
         new_tiles[move.tile.coordinate_y][move.tile.coordinate_x].object = new_tiles[move.piece.tile.coordinate_y][move.piece.tile.coordinate_x].object
         new_tiles[move.piece.tile.coordinate_y][move.piece.tile.coordinate_x].object = None
-
-        #print(self.tile_to_str(new_tiles))
 
         pieces = self.get_team_pieces(TEAMS.black if move.piece.team == TEAMS.white else TEAMS.white , tiles=new_tiles)
 
@@ -126,8 +130,6 @@ class Board():
                     return True
 
         return False
-
-#------------------------------------------------------------------------------------------------
 
     def capture_piece(self, piece: Piece) -> None:
         piece.is_captured = True

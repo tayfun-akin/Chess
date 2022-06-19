@@ -1,7 +1,5 @@
-- Clean up drag/drop functions.
-- Implement "en passant" and "castling"
+- Implement "en passant" and "castling".
 - Implement turn-based movements.
 - Make gui interactions toggleable based on turns.
 - Build an api for interacting with ai's.
-- Carry the is_check functions to init functions.
 - Optimise the move-making and legality checking process'.
