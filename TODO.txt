@@ -1,5 +1,3 @@
 - Implement "en passant" and "castling".
-- Implement turn-based movements.
-- Make gui interactions toggleable based on turns.
 - Build an api for interacting with ai's.
 - Optimise the move-making and legality checking process'.

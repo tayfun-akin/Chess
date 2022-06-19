@@ -24,6 +24,8 @@ class Engine():
         self.board = self.init_board()
         self.canvas = self.init_canvas()
 
+        self.turn = config.starting_team
+
         # For tests, delet this
         self.window.mainloop()
 
@@ -35,6 +37,15 @@ class Engine():
             return self.funcs['black_pawn_func']
 
         return self.funcs[name.split('_')[1] + "_func"]
+
+    def advance_turn(self) -> TEAMS:
+        ind = 0 if (self.turn.value + 1) >= len(TEAMS) else self.turn.value + 1
+
+        new_turn = TEAMS(ind)
+
+        self.turn = new_turn
+
+        return new_turn
 
     def init_board(self) -> Board:
         board = Board(self.board_height, self.board_width)
@@ -112,7 +123,7 @@ class Engine():
 
     def paint_moves(self, canvas: tk.Canvas, tile: Tile) -> None:
         if tile.object != None:
-            moves = self.board.get_piece_moves(tile.object)
+            moves = self.board.get_piece_moves(tile.object, self.turn)
 
             for m in moves:
                 if m.type == MOVES.capture:
@@ -131,7 +142,6 @@ class Engine():
         if canvas==None:
             canvas = self.canvas
 
-        # ADD MOVE SAVING SO DONT HAVE TO CALC MOVES ON BOTH INIT AND DROP EVENTS
         def init_drag(event: tk.Event):
             coor_x = int((event.widget.winfo_x() + event.x) / self.icon_size)
             coor_y = int((event.widget.winfo_y() + event.y) / self.icon_size)
@@ -161,12 +171,13 @@ class Engine():
             if piece == None:
                 return
 
-            moves = self.board.get_piece_moves(piece)
+            moves = self.board.get_piece_moves(piece, self.turn)
 
             new_x = piece.tile.attr['x1']
             new_y = piece.tile.attr['y1']
             new_color = piece.tile.attr['org_color']
             dest = piece.tile
+            moving = False
 
             for m in moves:
                 if m.tile == tile:
@@ -174,24 +185,9 @@ class Engine():
                     new_y = tile.attr['y1']
                     new_color = tile.attr['org_color']
                     dest = tile
+                    moving = True
 
                     break
-
-            #for m in moves:
-            #    if m.tile == tile:
-            #        if self.board.is_check(m):
-            #            new_x = piece.tile.attr['x1']
-            #            new_y = piece.tile.attr['y1']
-            #            new_color = piece.tile.attr['org_color']
-            #            dest = piece.tile
-            #
-            #        else:
-            #            new_x = tile.attr['x1']
-            #            new_y = tile.attr['y1']
-            #            new_color = tile.attr['org_color']
-            #            dest = tile
-            #
-            #        break
 
             event.widget.place(x=new_x, y=new_y, anchor = "nw")
             event.widget.configure(bg=new_color)
@@ -200,6 +196,9 @@ class Engine():
             self.reset_canvas(canvas)
 
             piece.is_moving = False
+
+            if moving:
+                self.advance_turn()
 
         img = ImageTk.PhotoImage(piece.icon)
         piece.icon = img

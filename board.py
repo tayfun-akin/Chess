@@ -90,7 +90,10 @@ class Board():
 
         return tiles
 
-    def get_piece_moves(self, piece: Piece) -> list[Move]:
+    def get_piece_moves(self, piece: Piece, turn: TEAMS) -> list[Move]:
+        if turn != piece.team:
+            return []
+
         all_moves = piece.move_func(self.tiles, piece)
         final_moves = []
 

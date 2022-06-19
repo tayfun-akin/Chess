@@ -14,6 +14,7 @@ class Config():
         self.pieces = settings['pieces']
         self.layout = settings['layout']
         self.funcs = settings['funcs']
+        self.starting_team = settings['starting_team']
 
 class Chess_Config(Config):
     def __init__(self) -> None:
@@ -297,6 +298,8 @@ class Chess_Config(Config):
         funcs = {'white_pawn_func': white_pawn_func, 'black_pawn_func': black_pawn_func, 'knight_func': knight_func, 'bishop_func': bishop_func,
                 'rook_func': rook_func, 'queen_func': queen_func, 'king_func': king_func, 'king_func': king_func}
 
+        starting_team = TEAMS.white
+
         variables = {
             'board_height': 8,
             'board_width': 8,
@@ -306,7 +309,8 @@ class Chess_Config(Config):
             'colors': colors,
             'pieces': pieces,
             'layout': layout,
-            'funcs': funcs
+            'funcs': funcs,
+            'starting_team': starting_team
         }
 
         super().__init__(variables)

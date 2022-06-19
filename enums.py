@@ -1,5 +1,18 @@
 from enum import Enum
 
-TEAMS = Enum('TEAMS', 'white black')
-MOVES = Enum('MOVES', 'capture move promote')
-PIECE_TYPES = Enum('PIECE_TYPES', 'pawn rook knight bishop queen king')
+class TEAMS(Enum):
+    white = 0
+    black = 1
+
+class MOVES(Enum):
+    capture = 0
+    move = 1
+    promote = 2
+
+class PIECE_TYPES(Enum):
+    pawn = 0
+    rook = 1
+    knight = 2
+    bishop = 3
+    queen = 4
+    king = 5
